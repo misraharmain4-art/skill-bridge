@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SkillBridge 🌉
 
 A Student Skill Exchange Platform for college students.
@@ -47,3 +48,6 @@ node server.js
 cd client
 npm run dev
 ```
+=======
+# skill-bridge
+>>>>>>> bd033b4ac50785f9a946a80a8ec03ce9830ea17c
