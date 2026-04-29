@@ -1,16 +1,6 @@
 import { useState } from 'react';
-import { Sparkles, Search } from 'lucide-react';
+import { Sparkles, Search, ArrowRight, Brain, Target, Info, CheckCircle } from 'lucide-react';
 import { students, SKILLS_LIST } from '../data/students';
-
-function Toast({ message, onClose }) {
-  return (
-    <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
-      <span className="text-2xl">🔄</span>
-      <span className="font-medium">{message}</span>
-      <button onClick={onClose} className="ml-2 text-slate-400 hover:text-white text-xl">×</button>
-    </div>
-  );
-}
 
 function getMatches(teach, learn) {
   if (!teach || !learn) return [];
@@ -19,60 +9,95 @@ function getMatches(teach, learn) {
       let score = 0;
       const offers = s.skillsOffered.map(x => x.toLowerCase());
       const wants = s.skillsWanted.map(x => x.toLowerCase());
-      // Student offers what you want to learn
-      if (offers.some(o => o.includes(learn.toLowerCase()) || learn.toLowerCase().includes(o))) score += 50;
-      // Student wants what you teach
-      if (wants.some(w => w.includes(teach.toLowerCase()) || teach.toLowerCase().includes(w))) score += 44;
-      score = Math.min(score + Math.floor(Math.random() * 10), 99);
-      return { ...s, matchPercent: score };
+      
+      // AI Logic: Mutual match check
+      const theyTeachWhatYouWant = offers.some(o => o.includes(learn.toLowerCase()) || learn.toLowerCase().includes(o));
+      const theyWantWhatYouTeach = wants.some(w => w.includes(teach.toLowerCase()) || teach.toLowerCase().includes(w));
+      
+      if (theyTeachWhatYouWant) score += 55;
+      if (theyWantWhatYouTeach) score += 35;
+      
+      // Random bonus for 'compatibility'
+      score = Math.min(score + Math.floor(Math.random() * 9), 99);
+      
+      return { 
+        ...s, 
+        matchPercent: score,
+        isMutual: theyTeachWhatYouWant && theyWantWhatYouTeach,
+        matchReason: theyTeachWhatYouWant && theyWantWhatYouTeach 
+          ? `Perfect 2-way swap! They teach ${learn} and want to learn ${teach}.` 
+          : theyTeachWhatYouWant 
+            ? `Expert match for ${learn}. They have mastered what you seek.`
+            : `Collaboration match. You can help them reach their goals.`
+      };
     })
     .filter(s => s.matchPercent >= 40)
     .sort((a, b) => b.matchPercent - a.matchPercent)
     .slice(0, 3);
 }
 
-function MatchCard({ student, teach, learn, onSwap }) {
+function MatchCard({ student, onSwap }) {
   const pct = student.matchPercent;
-  const color = pct >= 80 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' :
-    pct >= 60 ? 'text-blue-600 bg-blue-50 border-blue-200' : 'text-orange-600 bg-orange-50 border-orange-200';
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
-      <div className="flex items-center gap-4 mb-4">
-        <div className={`${student.color} w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl`}>
-          {student.initials}
+    <div className="glass-card rounded-[2.5rem] p-8 border border-white/5 relative group hover:border-primary/40 transition-all overflow-hidden animate-bounce-in">
+      {student.isMutual && (
+        <div className="absolute top-6 right-6 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+          <CheckCircle className="w-3 h-3" /> Mutual Match
         </div>
-        <div className="flex-1">
-          <h3 className="font-bold text-slate-900 text-lg">{student.name}</h3>
-          <p className="text-slate-400 text-sm">{student.branch} · {student.year}</p>
+      )}
+
+      <div className="flex flex-col md:flex-row gap-8 items-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className={`${student.color} w-24 h-24 rounded-[2rem] flex items-center justify-center text-white text-3xl font-black shadow-2xl group-hover:scale-110 transition-transform duration-500`}>
+            {student.initials}
+          </div>
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-white">{student.name}</h3>
+            <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">{student.branch} · {student.year}</p>
+          </div>
         </div>
-        <div className={`text-center px-3 py-1.5 rounded-full border font-bold text-lg ${color}`}>
-          ⭐ {pct}%
+
+        <div className="flex-1 space-y-6 w-full">
+          <div className="space-y-3">
+            <div className="flex justify-between items-end">
+              <div className="flex items-center gap-2 text-slate-400">
+                <Brain className="w-4 h-4 text-primary" />
+                <span className="text-xs font-bold uppercase tracking-widest">Compatibility Score</span>
+              </div>
+              <span className="text-2xl font-black text-white">{pct}%</span>
+            </div>
+            <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 p-0.5">
+              <div 
+                className="h-full bg-gradient-to-r from-primary to-blue-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(37,99,235,0.4)]" 
+                style={{ width: `${pct}%` }} 
+              />
+            </div>
+          </div>
+
+          <div className="bg-primary/5 rounded-2xl p-4 border border-primary/10 flex gap-4">
+            <div className="bg-primary/20 p-2 rounded-xl h-fit">
+              <Info className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Why this match?</p>
+              <p className="text-sm text-slate-300 leading-relaxed font-medium">{student.matchReason}</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button 
+              onClick={onSwap}
+              className="flex-1 gradient-btn-primary text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-xl"
+            >
+              Start Skill Swap <ArrowRight className="w-5 h-5" />
+            </button>
+            <button className="px-6 py-3.5 bg-white/5 text-slate-300 hover:bg-white/10 rounded-2xl font-bold text-sm border border-white/10 transition-all">
+              View Profile
+            </button>
+          </div>
         </div>
       </div>
-
-      <div className={`rounded-xl p-3 mb-4 text-sm ${color} border`}>
-        <strong>Why matched:</strong>{' '}
-        {student.name.split(' ')[0]} knows{' '}
-        {student.skillsOffered.join(', ')} (what you want) and needs{' '}
-        {student.skillsWanted.join(', ')} (what you offer)!
-      </div>
-
-      <div className="flex gap-2 flex-wrap mb-4">
-        {student.skillsOffered.map(s => (
-          <span key={s} className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full">{s}</span>
-        ))}
-        {student.skillsWanted.map(s => (
-          <span key={s} className="bg-blue-50 text-blue-700 border border-blue-200 text-xs px-2.5 py-0.5 rounded-full">{s}</span>
-        ))}
-      </div>
-
-      <button
-        onClick={onSwap}
-        className="w-full bg-secondary hover:bg-orange-600 text-white py-2.5 rounded-xl font-semibold transition-colors"
-      >
-        Start Skill Swap 🔄
-      </button>
     </div>
   );
 }
@@ -97,75 +122,92 @@ export default function SmartMatch() {
   };
 
   return (
-    <div className="space-y-8 py-4 max-w-3xl mx-auto">
-      {toast && <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
-        <span className="text-2xl">🔄</span><span className="font-medium">{toast}</span>
-        <button onClick={() => setToast(null)} className="ml-2 text-slate-400 hover:text-white text-xl">×</button>
-      </div>}
-
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 bg-blue-50 text-primary px-4 py-1.5 rounded-full text-sm font-medium">
-          <Sparkles className="w-4 h-4" /> Powered by AI Matching
+    <div className="space-y-12 py-8 max-w-4xl mx-auto">
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[120] bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce-in">
+          <span className="text-2xl">🔄</span>
+          <span className="font-bold">{toast}</span>
         </div>
-        <h1 className="text-3xl font-bold text-slate-900">🤖 AI Skill Matcher</h1>
-        <p className="text-slate-500">Tell us what you know and what you want to learn</p>
+      )}
+
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-5 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/5">
+          <Sparkles className="w-4 h-4" /> AI Engine v2.0
+        </div>
+        <h1 className="text-5xl font-black text-white leading-tight">Advanced <span className="text-primary">Skill Matcher</span></h1>
+        <p className="text-slate-400 text-lg max-w-xl mx-auto font-medium">Our AI analyzes thousands of peer profiles to find your perfect technical counterpart.</p>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">I can teach... 🎓</label>
-            <select
-              value={teach}
-              onChange={e => setTeach(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white"
-            >
-              <option value="">Select a skill you can teach</option>
-              {SKILLS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+      <div className="glass-card rounded-[3rem] p-10 border border-white/5 shadow-2xl relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/10 blur-3xl rounded-full" />
+        
+        <div className="grid md:grid-cols-2 gap-8 relative z-10">
+          <div className="space-y-3">
+            <label className="block text-sm font-black text-slate-400 uppercase tracking-widest ml-1">I can teach 🎓</label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Target className="w-5 h-5 text-slate-500 group-focus-within:text-primary transition-colors" />
+              </div>
+              <select
+                value={teach}
+                onChange={e => setTeach(e.target.value)}
+                className="w-full bg-slate-900/50 border border-white/10 rounded-[1.5rem] pl-12 pr-6 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary appearance-none transition-all hover:bg-slate-900"
+              >
+                <option value="">Select your expert skill</option>
+                {SKILLS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">I want to learn... 🌱</label>
-            <select
-              value={learn}
-              onChange={e => setLearn(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white"
-            >
-              <option value="">Select a skill you want to learn</option>
-              {SKILLS_LIST.filter(s => s !== teach).map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+
+          <div className="space-y-3">
+            <label className="block text-sm font-black text-slate-400 uppercase tracking-widest ml-1">I want to learn 🌱</label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Sparkles className="w-5 h-5 text-slate-500 group-focus-within:text-primary transition-colors" />
+              </div>
+              <select
+                value={learn}
+                onChange={e => setLearn(e.target.value)}
+                className="w-full bg-slate-900/50 border border-white/10 rounded-[1.5rem] pl-12 pr-6 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary appearance-none transition-all hover:bg-slate-900"
+              >
+                <option value="">Select target skill</option>
+                {SKILLS_LIST.filter(s => s !== teach).map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
           </div>
         </div>
 
         <button
           onClick={handleFind}
           disabled={!teach || !learn}
-          className="w-full bg-primary hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-colors shadow-md shadow-blue-200"
+          className="w-full mt-10 gradient-btn-primary disabled:opacity-30 disabled:cursor-not-allowed text-white py-5 rounded-[1.5rem] font-black text-xl flex items-center justify-center gap-3 shadow-2xl shadow-primary/20 relative z-10"
         >
-          <Search className="w-5 h-5" /> Find My Match 🔍
+          <Search className="w-6 h-6" /> Find My AI Match
         </button>
       </div>
 
       {searched && (
-        <div className="space-y-4">
-          {matches.length > 0 ? (
-            <>
-              <h2 className="text-xl font-bold text-slate-900 text-center">
-                🎯 Found {matches.length} Match{matches.length > 1 ? 'es' : ''} for You!
-              </h2>
-              <div className="space-y-4">
-                {matches.map(m => (
-                  <MatchCard key={m.id} student={m} teach={teach} learn={learn} onSwap={showToast} />
-                ))}
+        <div className="space-y-8 animate-fade-in">
+          <div className="flex items-center gap-4 justify-center">
+            <div className="h-px bg-white/10 flex-1" />
+            <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.3em] whitespace-nowrap">
+              Top Matches found for you
+            </h2>
+            <div className="h-px bg-white/10 flex-1" />
+          </div>
+
+          <div className="space-y-6">
+            {matches.length > 0 ? (
+              matches.map(m => <MatchCard key={m.id} student={m} onSwap={showToast} />)
+            ) : (
+              <div className="glass-card rounded-[2.5rem] p-16 text-center border border-white/5">
+                <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">😕</div>
+                <h3 className="text-2xl font-bold text-white mb-2">No High-Confidence Matches</h3>
+                <p className="text-slate-500 max-w-sm mx-auto">Try expanding your skill selection or listing more skills in your profile dashboard.</p>
               </div>
-            </>
-          ) : (
-            <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
-              <div className="text-5xl mb-3">😔</div>
-              <p className="text-slate-600 font-medium">No strong matches found right now</p>
-              <p className="text-slate-400 text-sm mt-1">Try different skill combinations!</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>
