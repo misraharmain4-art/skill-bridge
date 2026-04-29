@@ -1,0 +1,68 @@
+export const students = [
+  {
+    id: 1, name: 'Rahul Sharma', initials: 'RS', color: 'bg-blue-500',
+    branch: 'CSE', year: '2nd Year',
+    skillsOffered: ['Python', 'Machine Learning'],
+    skillsWanted: ['UI Design'],
+    level: 'Expert', stars: 3, coins: 450,
+    category: 'Coding',
+  },
+  {
+    id: 2, name: 'Priya Nair', initials: 'PN', color: 'bg-pink-500',
+    branch: 'ISE', year: '2nd Year',
+    skillsOffered: ['Figma', 'UI Design'],
+    skillsWanted: ['Python'],
+    level: 'Intermediate', stars: 2, coins: 380,
+    category: 'Design',
+  },
+  {
+    id: 3, name: 'Arjun Reddy', initials: 'AR', color: 'bg-green-500',
+    branch: 'MBA', year: '1st Year',
+    skillsOffered: ['Public Speaking', 'Leadership'],
+    skillsWanted: ['Coding'],
+    level: 'Expert', stars: 3, coins: 320,
+    category: 'Speaking',
+  },
+  {
+    id: 4, name: 'Sneha Kulkarni', initials: 'SK', color: 'bg-purple-500',
+    branch: 'CSE', year: '2nd Year',
+    skillsOffered: ['Mathematics', 'Statistics'],
+    skillsWanted: ['Web Dev'],
+    level: 'Expert', stars: 3, coins: 290,
+    category: 'Math',
+  },
+  {
+    id: 5, name: 'Rohit Verma', initials: 'RV', color: 'bg-yellow-500',
+    branch: 'ECE', year: '2nd Year',
+    skillsOffered: ['Guitar', 'Music Theory'],
+    skillsWanted: ['Python'],
+    level: 'Beginner', stars: 1, coins: 150,
+    category: 'Music',
+  },
+  {
+    id: 6, name: 'Ananya Singh', initials: 'AS', color: 'bg-indigo-500',
+    branch: 'ISE', year: '3rd Year',
+    skillsOffered: ['Content Writing', 'Canva'],
+    skillsWanted: ['Data Science'],
+    level: 'Intermediate', stars: 2, coins: 220,
+    category: 'Design',
+  },
+  {
+    id: 7, name: 'Kiran Patil', initials: 'KP', color: 'bg-teal-500',
+    branch: 'CSE', year: '3rd Year',
+    skillsOffered: ['Web Development', 'React'],
+    skillsWanted: ['UI Design'],
+    level: 'Intermediate', stars: 2, coins: 310,
+    category: 'Coding',
+  },
+  {
+    id: 8, name: 'Divya Rao', initials: 'DR', color: 'bg-rose-500',
+    branch: 'ECE', year: '2nd Year',
+    skillsOffered: ['Python', 'Arduino'],
+    skillsWanted: ['Public Speaking'],
+    level: 'Intermediate', stars: 2, coins: 180,
+    category: 'Coding',
+  },
+];
+
+export const SKILLS_LIST = ['Python', 'UI Design', 'Math', 'Speaking', 'Music', 'Writing', 'Web Dev'];
